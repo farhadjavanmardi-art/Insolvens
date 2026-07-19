@@ -26,6 +26,9 @@ export default async function DashboardLayout({
           <Link href="/dashboard" className="block px-3 py-2 rounded-sm hover:bg-paper/10 transition-colors">
             Übersicht
           </Link>
+          <Link href="/dashboard/cases" className="block px-3 py-2 rounded-sm hover:bg-paper/10 transition-colors">
+            Alle Akten
+          </Link>
           <Link href="/dashboard/cases/new" className="block px-3 py-2 rounded-sm hover:bg-paper/10 transition-colors">
             Neue Akte anlegen
           </Link>

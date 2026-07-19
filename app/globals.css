@@ -9,6 +9,18 @@ body {
   color: #14213D;
 }
 
+@layer components {
+  .input {
+    @apply border border-ink/15 rounded-sm px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-oxblood/40;
+  }
+  .label {
+    @apply block text-xs font-medium text-ash mb-1;
+  }
+  .btn {
+    @apply bg-ink text-paper rounded-sm py-2 px-4 text-sm font-medium hover:bg-ink/90 transition-colors;
+  }
+}
+
 /* Aktenzeichen (case reference) stamp — the signature element of InsolvenzFlow */
 .aktenzeichen {
   font-family: "IBM Plex Mono", monospace;
