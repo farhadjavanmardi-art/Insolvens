@@ -1,0 +1,23 @@
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #EDEEE7;
+  color: #14213D;
+}
+
+/* Aktenzeichen (case reference) stamp — the signature element of InsolvenzFlow */
+.aktenzeichen {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.03em;
+  border: 1.5px solid #8C2F39;
+  color: #8C2F39;
+  padding: 2px 8px;
+  border-radius: 2px;
+  display: inline-block;
+  transform: rotate(-1deg);
+  background: rgba(140, 47, 57, 0.04);
+}
