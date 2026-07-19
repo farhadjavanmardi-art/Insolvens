@@ -46,6 +46,15 @@ middleware.ts      محافظت از مسیرهای /dashboard
 پروژه Supabase به نام **InsolvenzFlow** (region: eu-central-1 / فرانکفورت) از قبل ساخته شده و شامل ۹ جدول با Row Level Security فعاله:
 `profiles, clients, cases, creditors, documents, deadlines, tasks, insolvenzplan, activity_log`
 
+فایل‌های SQL این ساختار تو پوشه `supabase/migrations/` قرار دارن. اگه خواستید همین دیتابیس رو روی یه پروژه Supabase دیگه (مثلاً برای dev/staging) بازسازی کنید:
+
+```bash
+npx supabase login
+npx supabase link --project-ref <PROJECT_REF>
+npx supabase db push
+```
+
+
 ## گام‌های بعدی پیشنهادی
 
 - صفحه لیست کامل پرونده‌ها (`/dashboard/cases`) با فیلتر بر اساس وضعیت

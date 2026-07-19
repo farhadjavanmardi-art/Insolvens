@@ -1,0 +1,4 @@
+# Supabase CLI config for InsolvenzFlow
+# Project ref: phzsdecdndcwbuavdxvi (region: eu-central-1 / Frankfurt)
+# Link with: supabase link --project-ref phzsdecdndcwbuavdxvi
+project_id = "insolvenzflow"
