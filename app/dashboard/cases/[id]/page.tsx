@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DOCUMENT_TEMPLATES, type DocumentTemplateKey } from "@/lib/documentTemplates";
+import { EMAIL_TEMPLATES, type EmailTemplateKey } from "@/lib/emailTemplates";
 import StatusSelector from "@/components/StatusSelector";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -21,7 +23,13 @@ const RANK_LABELS: Record<string, string> = {
   "massegläubiger": "Massegläubiger",
 };
 
-export default async function CaseDetailPage({ params }: { params: { id: string } }) {
+export default async function CaseDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { email_template?: string; creditor_id?: string };
+}) {
   const supabase = createClient();
   const caseId = params.id;
 
@@ -175,6 +183,32 @@ export default async function CaseDetailPage({ params }: { params: { id: string 
     redirect(`/dashboard/cases/${caseId}`);
   }
 
+  // ---------- Email preview (computed from searchParams, no JS needed) ----------
+  const hdrs = headers();
+  const host = hdrs.get("host");
+  const proto = hdrs.get("x-forwarded-proto") ?? "https";
+  const siteOrigin = host ? `${proto}://${host}` : "";
+
+  const selectedCreditor = creditors?.find((c) => c.id === searchParams.creditor_id);
+  const emailTemplateKey = searchParams.email_template as EmailTemplateKey | undefined;
+  let emailPreview: { subject: string; body: string } | null = null;
+  if (emailTemplateKey && EMAIL_TEMPLATES[emailTemplateKey]) {
+    emailPreview = EMAIL_TEMPLATES[emailTemplateKey].generate({
+      caseNumber: theCase.case_number ?? "",
+      clientName: theCase.clients?.full_name ?? "",
+      recipientName: selectedCreditor?.name ?? theCase.clients?.full_name ?? "",
+      court: theCase.court ?? "",
+      dueDate: deadlines?.find((d) => d.status === "offen")?.due_date ?? undefined,
+      portalLink: selectedCreditor ? `${siteOrigin}/portal/${selectedCreditor.access_token}` : undefined,
+    });
+  }
+  const emailRecipient = selectedCreditor?.email ?? theCase.clients?.email ?? "";
+  const mailtoHref = emailPreview
+    ? `mailto:${emailRecipient}?subject=${encodeURIComponent(emailPreview.subject)}&body=${encodeURIComponent(
+        emailPreview.body
+      )}`
+    : undefined;
+
   // ---------- Render ----------
 
   return (
@@ -203,6 +237,12 @@ export default async function CaseDetailPage({ params }: { params: { id: string 
                 <div>
                   <div className="text-ink">{c.name}</div>
                   <div className="text-xs text-ash">{RANK_LABELS[c.rank] ?? c.rank}</div>
+                  <Link
+                    href={`/dashboard/cases/${caseId}?email_template=glaeubiger_forderungsanmeldung&creditor_id=${c.id}#email`}
+                    className="text-[11px] text-oxblood underline"
+                  >
+                    Portal-Link / E-Mail vorbereiten
+                  </Link>
                 </div>
                 <div className="font-mono text-sm text-ink">
                   {Number(c.claim_amount).toLocaleString("de-DE")} €
@@ -338,7 +378,47 @@ export default async function CaseDetailPage({ params }: { params: { id: string 
         </form>
       </Section>
 
-      {/* Insolvenzplan */}
+      {/* E-Mail Vorlagen */}
+      <Section title="E-Mail" count={0}>
+        <form method="get" id="email" className="grid grid-cols-2 gap-3 mb-5">
+          <select name="email_template" defaultValue={searchParams.email_template ?? ""} className="input">
+            <option value="">Vorlage wählen…</option>
+            {Object.entries(EMAIL_TEMPLATES).map(([key, t]) => (
+              <option key={key} value={key}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+          <select name="creditor_id" defaultValue={searchParams.creditor_id ?? ""} className="input">
+            <option value="">Empfänger: Mandant ({theCase.clients?.full_name})</option>
+            {creditors?.map((c) => (
+              <option key={c.id} value={c.id}>
+                Empfänger: {c.name}
+              </option>
+            ))}
+          </select>
+          <button type="submit" className="btn col-span-2">
+            Vorschau erstellen
+          </button>
+        </form>
+
+        {emailPreview ? (
+          <div className="border border-ink/10 rounded-sm p-4 bg-paper/50">
+            <div className="text-xs text-ash mb-1">An: {emailRecipient || "[keine E-Mail hinterlegt]"}</div>
+            <div className="text-sm font-medium text-ink mb-3">{emailPreview.subject}</div>
+            <pre className="whitespace-pre-wrap font-sans text-sm text-ink mb-4">{emailPreview.body}</pre>
+            {mailtoHref && (
+              <a href={mailtoHref} className="btn inline-block">
+                In E-Mail-Programm öffnen
+              </a>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-ash">Wählen Sie eine Vorlage, um eine Vorschau zu erstellen.</p>
+        )}
+      </Section>
+
+
       <Section title="Insolvenzplan" count={plan ? 1 : 0}>
         <form action={savePlan} className="grid grid-cols-3 gap-3">
           <div>
