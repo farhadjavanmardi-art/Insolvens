@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { DOCUMENT_TEMPLATES, type DocumentTemplateKey } from "@/lib/documentTemplates";
 import { EMAIL_TEMPLATES, type EmailTemplateKey } from "@/lib/emailTemplates";
 import StatusSelector from "@/components/StatusSelector";
+import DeleteCaseButton from "@/components/DeleteCaseButton";
 
 const STATUS_LABELS: Record<string, string> = {
   intake: "Aufnahme",
@@ -181,6 +182,16 @@ export default async function CaseDetailPage({
       await supabase.from("insolvenzplan").insert(payload);
     }
     redirect(`/dashboard/cases/${caseId}`);
+  }
+
+  async function deleteCase(formData: FormData) {
+    "use server";
+    const supabase = createClient();
+    const clientId = String(formData.get("client_id"));
+    // Deletes the case (cascades to creditors/documents/deadlines/tasks/insolvenzplan/activity_log)
+    // and the client record itself — used for DSGVO "Recht auf Löschung" requests.
+    await supabase.from("clients").delete().eq("id", clientId);
+    redirect("/dashboard/cases");
   }
 
   // ---------- Email preview (computed from searchParams, no JS needed) ----------
@@ -454,6 +465,15 @@ export default async function CaseDetailPage({
             <span className="font-mono text-ink">{Number(plan.total_plan_amount).toLocaleString("de-DE")} €</span>
           </p>
         )}
+      </Section>
+
+      {/* DSGVO: Recht auf Löschung */}
+      <Section title="Datenschutz" count={0}>
+        <p className="text-sm text-ash mb-3">
+          Löscht den Mandanten, die Akte und alle zugehörigen Daten (Gläubiger, Fristen, Aufgaben, Dokumente,
+          Insolvenzplan) unwiderruflich. Nutzen Sie dies zur Erfüllung von DSGVO-Löschanfragen (Art. 17 DSGVO).
+        </p>
+        <DeleteCaseButton action={deleteCase} clientId={theCase.client_id} />
       </Section>
     </div>
   );

@@ -10,6 +10,9 @@ async function createCase(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase.from("profiles").select("firm_id").eq("id", user.id).single();
+  if (!profile) throw new Error("Profil nicht gefunden.");
+
   const fullName = String(formData.get("full_name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
@@ -20,7 +23,7 @@ async function createCase(formData: FormData) {
 
   const { data: client, error: clientError } = await supabase
     .from("clients")
-    .insert({ full_name: fullName, email, phone, address, created_by: user.id })
+    .insert({ full_name: fullName, email, phone, address, created_by: user.id, firm_id: profile.firm_id })
     .select("id")
     .single();
 
@@ -40,6 +43,7 @@ async function createCase(formData: FormData) {
       total_debt: totalDebt,
       notes,
       responsible_lawyer: user.id,
+      firm_id: profile.firm_id,
     })
     .select("id")
     .single();

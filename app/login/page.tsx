@@ -128,6 +128,11 @@ export default function LoginPage() {
             </button>
           </form>
         </div>
+        <p className="text-center text-xs text-ash mt-6">
+          <a href="/datenschutz" className="underline hover:text-ink">
+            Datenschutzerklärung
+          </a>
+        </p>
       </div>
     </main>
   );
