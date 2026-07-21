@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function SettingsPage() {
@@ -8,7 +9,16 @@ export default async function SettingsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase.from("profiles").select("firm_id").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("firm_id, calendar_feed_token")
+    .eq("id", user.id)
+    .single();
+
+  const hdrs = headers();
+  const host = hdrs.get("host");
+  const proto = hdrs.get("x-forwarded-proto") ?? "https";
+  const siteOrigin = host ? `${proto}://${host}` : "";
 
   const { data: settings } = await supabase
     .from("firm_ai_settings")
@@ -202,6 +212,17 @@ export default async function SettingsPage() {
             Speichern
           </button>
         </form>
+      </div>
+
+      <div className="bg-white border border-ink/10 rounded-sm p-6 mt-10">
+        <h2 className="text-sm font-semibold text-ink uppercase tracking-wide mb-3">Kalender-Abo (Fristen)</h2>
+        <p className="text-xs text-ash mb-4">
+          Fügen Sie diese Adresse als &quot;Kalender per URL abonnieren&quot; in Google Kalender, Outlook oder Apple
+          Kalender hinzu — Ihre offenen Fristen erscheinen dann automatisch und aktuell in Ihrem eigenen Kalender.
+        </p>
+        <code className="text-xs text-oxblood break-all block bg-paper/50 p-3 rounded-sm">
+          {`${siteOrigin}/api/calendar/${profile?.calendar_feed_token}`}
+        </code>
       </div>
     </div>
   );

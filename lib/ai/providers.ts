@@ -159,6 +159,42 @@ offene Fragen). Kein JSON, einfacher Fließtext mit Stichpunkten.`;
     : await chatCompleteAnthropic(apiKey, systemPrompt, transcript);
 }
 
+const DOC_CATEGORIES = ["gerichtsbeschluss", "forderungsanmeldung", "kontoauszug", "rechnung", "sonstiges"] as const;
+
+function parseOcrJson(raw: string): { category: string; title: string; extractedText: string } {
+  const cleaned = raw.trim().replace(/^```json\s*/i, "").replace(/```$/, "");
+  try {
+    const parsed = JSON.parse(cleaned);
+    return {
+      category: DOC_CATEGORIES.includes(parsed.category) ? parsed.category : "sonstiges",
+      title: String(parsed.title ?? "Gescanntes Dokument"),
+      extractedText: String(parsed.extracted_text ?? cleaned),
+    };
+  } catch {
+    return { category: "sonstiges", title: "Gescanntes Dokument", extractedText: cleaned };
+  }
+}
+
+export async function ocrExtractAndClassify(
+  provider: AIProvider,
+  apiKey: string,
+  base64Image: string,
+  mimeType: string
+): Promise<{ category: string; title: string; extractedText: string }> {
+  const systemPrompt = `Du bist Assistent einer Insolvenzrechts-Kanzlei. Lies den Text auf dem fotografierten
+Dokument vollständig und genau ab. Ordne es einer Kategorie zu: ${DOC_CATEGORIES.join(", ")}.
+Antworte AUSSCHLIESSLICH mit validem JSON: {"category": "...", "title": "kurzer Titel", "extracted_text": "..."}
+Kein Markdown, kein Codeblock, kein zusätzlicher Text.`;
+  const userPrompt = "Bitte lies und klassifiziere dieses Dokument.";
+
+  const raw =
+    provider === "openai"
+      ? await visionCompleteOpenAI(apiKey, base64Image, mimeType, systemPrompt, userPrompt)
+      : await visionCompleteAnthropic(apiKey, base64Image, mimeType, systemPrompt, userPrompt);
+
+  return parseOcrJson(raw);
+}
+
 export async function draftIntakeReply(
   provider: AIProvider,
   apiKey: string,

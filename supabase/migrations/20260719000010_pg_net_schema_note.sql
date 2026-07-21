@@ -1,0 +1,4 @@
+-- Note: pg_net does not support ALTER EXTENSION ... SET SCHEMA.
+-- The Supabase linter's "extension_in_public" warning for pg_net is a known,
+-- low-risk warning when pg_net is used for pg_cron-triggered outbound HTTP calls
+-- (as in 20260719000008_deadline_reminders_and_calendar_feed.sql) and is accepted as-is.

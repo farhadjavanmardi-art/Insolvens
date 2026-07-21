@@ -8,6 +8,7 @@ import StatusSelector from "@/components/StatusSelector";
 import DeleteCaseButton from "@/components/DeleteCaseButton";
 import VoiceToEmailForm from "@/components/VoiceToEmailForm";
 import PhotoToEmailForm from "@/components/PhotoToEmailForm";
+import OcrDocumentForm from "@/components/OcrDocumentForm";
 
 const STATUS_LABELS: Record<string, string> = {
   intake: "Aufnahme",
@@ -52,6 +53,14 @@ export default async function CaseDetailPage({
       supabase.from("documents").select("*").eq("case_id", caseId).order("created_at", { ascending: false }),
       supabase.from("insolvenzplan").select("*").eq("case_id", caseId).maybeSingle(),
     ]);
+
+  const { data: payments } = plan
+    ? await supabase
+        .from("insolvenzplan_payments")
+        .select("*")
+        .eq("plan_id", plan.id)
+        .order("installment_no", { ascending: true })
+    : { data: null };
 
   // ---------- Server Actions ----------
 
@@ -183,6 +192,45 @@ export default async function CaseDetailPage({
     } else {
       await supabase.from("insolvenzplan").insert(payload);
     }
+    redirect(`/dashboard/cases/${caseId}`);
+  }
+
+  async function generatePaymentSchedule() {
+    "use server";
+    const supabase = createClient();
+    const { data: currentPlan } = await supabase.from("insolvenzplan").select("*").eq("case_id", caseId).maybeSingle();
+    if (!currentPlan || !currentPlan.duration_months || !currentPlan.monthly_payment) {
+      throw new Error("Bitte zuerst Rate, Laufzeit und Beginn speichern.");
+    }
+    const { count } = await supabase
+      .from("insolvenzplan_payments")
+      .select("*", { count: "exact", head: true })
+      .eq("plan_id", currentPlan.id);
+    if (count && count > 0) return; // already generated
+
+    const start = currentPlan.start_date ? new Date(currentPlan.start_date) : new Date();
+    const rows = Array.from({ length: currentPlan.duration_months }, (_, i) => {
+      const due = new Date(start.getFullYear(), start.getMonth() + i, start.getDate());
+      return {
+        plan_id: currentPlan.id,
+        installment_no: i + 1,
+        due_date: due.toISOString().slice(0, 10),
+        amount: currentPlan.monthly_payment,
+      };
+    });
+    await supabase.from("insolvenzplan_payments").insert(rows);
+    redirect(`/dashboard/cases/${caseId}`);
+  }
+
+  async function togglePayment(formData: FormData) {
+    "use server";
+    const supabase = createClient();
+    const id = String(formData.get("id"));
+    const nextPaid = formData.get("next_paid") === "true";
+    await supabase
+      .from("insolvenzplan_payments")
+      .update({ paid: nextPaid, paid_at: nextPaid ? new Date().toISOString() : null })
+      .eq("id", id);
     redirect(`/dashboard/cases/${caseId}`);
   }
 
@@ -467,6 +515,45 @@ export default async function CaseDetailPage({
             <span className="font-mono text-ink">{Number(plan.total_plan_amount).toLocaleString("de-DE")} €</span>
           </p>
         )}
+
+        {plan && (
+          <div className="mt-5 pt-5 border-t border-ink/10">
+            {payments && payments.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-ink uppercase tracking-wide">Ratenzahlungen</span>
+                  <span className="text-xs text-ash">
+                    {payments.filter((p) => p.paid).length} / {payments.length} bezahlt
+                  </span>
+                </div>
+                <div className="max-h-64 overflow-y-auto divide-y divide-ink/10">
+                  {payments.map((p) => (
+                    <div key={p.id} className="py-2 flex items-center justify-between text-sm">
+                      <div>
+                        <span className="font-mono text-xs text-ash">#{p.installment_no}</span>{" "}
+                        <span className={p.paid ? "text-ash line-through" : "text-ink"}>{p.due_date}</span>{" "}
+                        <span className="font-mono text-xs">{Number(p.amount).toLocaleString("de-DE")} €</span>
+                      </div>
+                      <form action={togglePayment}>
+                        <input type="hidden" name="id" value={p.id} />
+                        <input type="hidden" name="next_paid" value={(!p.paid).toString()} />
+                        <button type="submit" className="text-xs text-oxblood underline">
+                          {p.paid ? "Als offen markieren" : "Als bezahlt markieren"}
+                        </button>
+                      </form>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <form action={generatePaymentSchedule}>
+                <button type="submit" className="btn text-xs">
+                  Zahlungsplan generieren ({plan.duration_months ?? 0} Raten)
+                </button>
+              </form>
+            )}
+          </div>
+        )}
       </Section>
 
       {/* KI-Assistent (Beta) */}
@@ -479,9 +566,10 @@ export default async function CaseDetailPage({
           </Link>
           . Es werden keine Audio-/Bilddaten dauerhaft gespeichert.
         </p>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <VoiceToEmailForm caseId={caseId} />
           <PhotoToEmailForm caseId={caseId} />
+          <OcrDocumentForm caseId={caseId} />
         </div>
       </Section>
 
