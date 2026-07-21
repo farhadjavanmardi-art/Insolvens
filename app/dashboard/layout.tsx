@@ -32,6 +32,9 @@ export default async function DashboardLayout({
           <Link href="/dashboard/cases/new" className="block px-3 py-2 rounded-sm hover:bg-paper/10 transition-colors">
             Neue Akte anlegen
           </Link>
+          <Link href="/dashboard/settings" className="block px-3 py-2 rounded-sm hover:bg-paper/10 transition-colors">
+            Einstellungen
+          </Link>
         </nav>
         <div className="px-3 py-4 border-t border-paper/10">
           <SignOutButton />

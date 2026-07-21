@@ -6,6 +6,8 @@ import { DOCUMENT_TEMPLATES, type DocumentTemplateKey } from "@/lib/documentTemp
 import { EMAIL_TEMPLATES, type EmailTemplateKey } from "@/lib/emailTemplates";
 import StatusSelector from "@/components/StatusSelector";
 import DeleteCaseButton from "@/components/DeleteCaseButton";
+import VoiceToEmailForm from "@/components/VoiceToEmailForm";
+import PhotoToEmailForm from "@/components/PhotoToEmailForm";
 
 const STATUS_LABELS: Record<string, string> = {
   intake: "Aufnahme",
@@ -465,6 +467,22 @@ export default async function CaseDetailPage({
             <span className="font-mono text-ink">{Number(plan.total_plan_amount).toLocaleString("de-DE")} €</span>
           </p>
         )}
+      </Section>
+
+      {/* KI-Assistent (Beta) */}
+      <Section title="KI-Assistent (Beta)" count={0}>
+        <p className="text-xs text-ash mb-4">
+          Nutzt einen extern konfigurierten KI-Anbieter (OpenAI/Anthropic). Erfordert Einrichtung und
+          AVV-Bestätigung unter{" "}
+          <Link href="/dashboard/settings" className="text-oxblood underline">
+            Einstellungen
+          </Link>
+          . Es werden keine Audio-/Bilddaten dauerhaft gespeichert.
+        </p>
+        <div className="grid grid-cols-2 gap-4">
+          <VoiceToEmailForm caseId={caseId} />
+          <PhotoToEmailForm caseId={caseId} />
+        </div>
       </Section>
 
       {/* DSGVO: Recht auf Löschung */}

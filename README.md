@@ -60,4 +60,13 @@ npx supabase db push
 - صفحه لیست کامل پرونده‌ها (`/dashboard/cases`) با فیلتر بر اساس وضعیت
 - صفحه مدیریت طلبکاران هر پرونده
 - اتصال n8n برای Voice-to-Email و تولید خودکار اسناد
+
+## KI-Funktionen (Beta): Voice-to-Email & Foto-to-Email
+
+Optional و jeweils pro Kanzlei aktivierbar unter `/dashboard/settings`:
+
+- هر دفتر وکالت **کلید API خودش** رو وارد می‌کنه (OpenAI و/یا Anthropic) — هیچ کلیدی تو کد هاردکد نشده، و کلید فقط سمت سرور استفاده می‌شه (Server Actions / Route Handlers)، هرگز به مرورگر ارسال نمی‌شه.
+- این قابلیت فقط بعد از تأیید صریح دفتر (که یک AVV/قرارداد پردازش داده با ارائه‌دهنده داره) فعال می‌شه.
+- صدا و عکس **فقط در حافظه پردازش می‌شن** و هیچ‌جا ذخیره دائمی نمی‌شن — فقط پیش‌نویس نهایی ایمیل به وکیل نشون داده می‌شه.
+- Voice-to-Email فعلاً به OpenAI (Whisper) نیاز داره. Foto-to-Email با OpenAI یا Anthropic کار می‌کنه.
 - افزودن نقش‌ها (admin/lawyer/paralegal) در RLS policies برای محدود کردن دسترسی
