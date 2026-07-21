@@ -16,6 +16,45 @@ export default async function SettingsPage() {
     .eq("firm_id", profile?.firm_id)
     .maybeSingle();
 
+  const { data: emailSettings } = await supabase
+    .from("firm_email_settings")
+    .select("from_email, from_name, updated_at")
+    .eq("firm_id", profile?.firm_id)
+    .maybeSingle();
+
+  async function saveEmailSettings(formData: FormData) {
+    "use server";
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/login");
+    const { data: profile } = await supabase.from("profiles").select("firm_id").eq("id", user.id).single();
+    if (!profile) return;
+
+    const fromEmail = String(formData.get("from_email") ?? "").trim();
+    const fromName = String(formData.get("from_name") ?? "").trim();
+    const apiKey = String(formData.get("resend_api_key") ?? "").trim();
+
+    const { data: existing } = await supabase
+      .from("firm_email_settings")
+      .select("resend_api_key")
+      .eq("firm_id", profile.firm_id)
+      .maybeSingle();
+
+    await supabase.from("firm_email_settings").upsert(
+      {
+        firm_id: profile.firm_id,
+        from_email: fromEmail,
+        from_name: fromName || null,
+        resend_api_key: apiKey || existing?.resend_api_key,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "firm_id" }
+    );
+    redirect("/dashboard/settings");
+  }
+
   async function saveAISettings(formData: FormData) {
     "use server";
     const supabase = createClient();
@@ -123,6 +162,47 @@ export default async function SettingsPage() {
           </button>
         </form>
       )}
+
+      <div className="bg-white border border-ink/10 rounded-sm p-6 mt-10">
+        <h2 className="text-sm font-semibold text-ink uppercase tracking-wide mb-3">
+          E-Mail-Versand (Resend) — für automatische Antworten
+        </h2>
+        <p className="text-xs text-ash mb-4">
+          Wird genutzt, um nach Ihrer Freigabe automatisch eine Eingangsbestätigung an neue Mandanten zu senden
+          (Menü &quot;Neue Anfragen&quot;). Ohne diese Einrichtung müssen Sie Antworten manuell versenden.
+        </p>
+        {emailSettings && (
+          <div className="text-sm text-moss mb-4">
+            ✓ Konfiguriert: {emailSettings.from_name ? `${emailSettings.from_name} <${emailSettings.from_email}>` : emailSettings.from_email}
+          </div>
+        )}
+        <form action={saveEmailSettings} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="label">Absender-Name</label>
+              <input name="from_name" defaultValue={emailSettings?.from_name ?? ""} className="input w-full" placeholder="Kanzlei Mustermann" />
+            </div>
+            <div>
+              <label className="label">Absender-E-Mail (bei Resend verifiziert)</label>
+              <input
+                name="from_email"
+                type="email"
+                required
+                defaultValue={emailSettings?.from_email ?? ""}
+                className="input w-full"
+                placeholder="kanzlei@ihre-domain.de"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="label">Resend API-Schlüssel {emailSettings && "(leer lassen, um bestehenden zu behalten)"}</label>
+            <input type="password" name="resend_api_key" placeholder={emailSettings ? "•••••••••• (unverändert lassen)" : "re_..."} className="input w-full" />
+          </div>
+          <button type="submit" className="btn">
+            Speichern
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

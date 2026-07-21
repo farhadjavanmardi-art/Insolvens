@@ -144,6 +144,43 @@ async function visionCompleteAnthropic(
 
 // ---------- High-level helpers used by the API routes ----------
 
+export async function summarizeIntake(
+  provider: AIProvider,
+  apiKey: string,
+  transcript: string
+): Promise<string> {
+  const systemPrompt = `Du bist Assistent einer Insolvenzrechts-Kanzlei. Ein/e potenzielle/r Mandant/in hat eine
+Sprachnotiz zu seiner/ihrer finanziellen Situation hinterlassen. Fasse die wichtigsten Fakten für den Anwalt
+strukturiert und knapp auf Deutsch zusammen (z. B. Einkommenssituation, genannte Schulden/Gläubiger, Dringlichkeit,
+offene Fragen). Kein JSON, einfacher Fließtext mit Stichpunkten.`;
+
+  return provider === "openai"
+    ? await chatCompleteOpenAI(apiKey, systemPrompt, transcript)
+    : await chatCompleteAnthropic(apiKey, systemPrompt, transcript);
+}
+
+export async function draftIntakeReply(
+  provider: AIProvider,
+  apiKey: string,
+  clientName: string,
+  transcriptOrNotes: string,
+  caseNumber: string
+): Promise<EmailDraft> {
+  const systemPrompt = `Du bist Assistent einer Insolvenzrechts-Kanzlei. Ein/e Anwalt/Anwältin hat die
+Anfrage eines/einer potenziellen Mandanten/Mandantin geprüft und freigegeben. Formuliere eine kurze,
+professionelle Eingangsbestätigung auf Deutsch: Danke für die Anfrage, Bestätigung dass die Akte angelegt
+wurde, Aktenzeichen nennen, nächste Schritte grob umreißen, Kontakt für Rückfragen anbieten.
+${EMAIL_JSON_INSTRUCTION}`;
+  const userPrompt = `Name: ${clientName}\nAktenzeichen: ${caseNumber}\nAngaben des Mandanten:\n${transcriptOrNotes || "(keine Sprachnotiz)"}`;
+
+  const raw =
+    provider === "openai"
+      ? await chatCompleteOpenAI(apiKey, systemPrompt, userPrompt)
+      : await chatCompleteAnthropic(apiKey, systemPrompt, userPrompt);
+
+  return parseEmailJson(raw);
+}
+
 export async function draftEmailFromTranscript(
   provider: AIProvider,
   apiKey: string,
