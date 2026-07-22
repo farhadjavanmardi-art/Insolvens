@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,6 +12,13 @@ export default async function DocumentViewPage({ params }: { params: { id: strin
 
   if (!doc) notFound();
 
+  async function markReviewed() {
+    "use server";
+    const supabase = createClient();
+    await supabase.from("documents").update({ reviewed: true }).eq("id", params.id);
+    redirect(`/dashboard/documents/${params.id}`);
+  }
+
   return (
     <div className="p-10 max-w-3xl">
       <div className="flex items-center justify-between mb-6 print:hidden">
@@ -22,6 +29,17 @@ export default async function DocumentViewPage({ params }: { params: { id: strin
           <span className="aktenzeichen text-[10px]">{doc.cases?.case_number}</span>
         </div>
       </div>
+
+      {!doc.reviewed && (
+        <div className="flex items-center justify-between bg-brass/10 border border-brass/40 rounded-sm px-4 py-2.5 mb-6 print:hidden">
+          <span className="text-xs text-ink">🤖 Von der KI erstellt/gescannt und noch nicht geprüft.</span>
+          <form action={markReviewed}>
+            <button type="submit" className="text-xs text-oxblood underline whitespace-nowrap ml-3">
+              Als geprüft markieren
+            </button>
+          </form>
+        </div>
+      )}
 
       <div className="bg-white border border-ink/10 rounded-sm p-10">
         <div className="flex items-center justify-between mb-6">

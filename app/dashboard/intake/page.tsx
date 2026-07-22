@@ -17,7 +17,7 @@ export default async function IntakeListPage() {
 
   const { data: submissions } = await supabase
     .from("intake_submissions")
-    .select("id, full_name, case_type, status, created_at")
+    .select("id, full_name, case_type, status, processing_status, created_at")
     .order("created_at", { ascending: false });
 
   const { data: firm } = await supabase.from("firms").select("intake_token, name").eq("id", profile?.firm_id).single();
@@ -51,7 +51,12 @@ export default async function IntakeListPage() {
                 <div className="text-ink">{s.full_name}</div>
                 <div className="text-xs text-ash">{s.case_type}</div>
               </div>
-              <div className="text-xs text-ash">{STATUS_LABELS[s.status] ?? s.status}</div>
+              <div className="text-xs text-ash">
+                {STATUS_LABELS[s.status] ?? s.status}
+                {s.processing_status && s.processing_status !== "processed" && (
+                  <span className="ml-1 text-brass">({s.processing_status})</span>
+                )}
+              </div>
             </Link>
           ))
         ) : (

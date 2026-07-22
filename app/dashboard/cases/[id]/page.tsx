@@ -72,6 +72,13 @@ export default async function CaseDetailPage({
     redirect(`/dashboard/cases/${caseId}`);
   }
 
+  async function markReviewed() {
+    "use server";
+    const supabase = createClient();
+    await supabase.from("cases").update({ needs_review: false }).eq("id", caseId);
+    redirect(`/dashboard/cases/${caseId}`);
+  }
+
   async function addCreditor(formData: FormData) {
     "use server";
     const supabase = createClient();
@@ -278,7 +285,7 @@ export default async function CaseDetailPage({
         ← Zurück zu allen Akten
       </Link>
 
-      <div className="flex items-start justify-between mt-3 mb-8">
+      <div className="flex items-start justify-between mt-3 mb-2">
         <div>
           <div className="aktenzeichen text-xs mb-2">{theCase.case_number}</div>
           <h1 className="font-serif text-2xl font-semibold text-ink">{theCase.clients?.full_name}</h1>
@@ -287,6 +294,27 @@ export default async function CaseDetailPage({
           </p>
         </div>
         <StatusSelector action={updateStatus} currentStatus={theCase.status} />
+      </div>
+
+      {theCase.needs_review && (
+        <div className="flex items-center justify-between bg-brass/10 border border-brass/40 rounded-sm px-4 py-2.5 mb-6">
+          <span className="text-xs text-ink">
+            🤖 Diese Akte wurde automatisch von der KI angelegt und ist noch nicht von einem/einer
+            Anwalt/Anwältin geprüft.
+          </span>
+          <form action={markReviewed}>
+            <button type="submit" className="text-xs text-oxblood underline whitespace-nowrap ml-3">
+              Als geprüft markieren
+            </button>
+          </form>
+        </div>
+      )}
+
+      <div className="mb-6">
+        <span className="text-xs text-ash">
+          Link für Mandant zum Nachreichen von Unterlagen:{" "}
+          <code className="text-oxblood break-all">{`${siteOrigin}/upload/${theCase.client_upload_token}`}</code>
+        </span>
       </div>
 
       {/* Gläubiger */}
@@ -409,7 +437,14 @@ export default async function CaseDetailPage({
             documents.map((doc) => (
               <div key={doc.id} className="py-2.5 text-sm flex items-center justify-between">
                 <div>
-                  <div className="text-ink">{doc.title}</div>
+                  <div className="text-ink">
+                    {doc.title}{" "}
+                    {!doc.reviewed && (
+                      <span className="text-[10px] text-oxblood border border-oxblood/40 rounded-sm px-1.5 py-0.5 ml-1">
+                        ungeprüft
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs text-ash">{new Date(doc.created_at).toLocaleDateString("de-DE")}</div>
                 </div>
                 <Link

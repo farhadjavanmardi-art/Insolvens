@@ -21,7 +21,7 @@ export default async function CasesListPage({
 
   let query = supabase
     .from("cases")
-    .select("id, case_number, status, case_type, total_debt, created_at, clients(full_name)")
+    .select("id, case_number, status, case_type, total_debt, created_at, needs_review, clients(full_name)")
     .order("created_at", { ascending: false });
 
   if (statusFilter) query = query.eq("status", statusFilter);
@@ -69,7 +69,10 @@ export default async function CasesListPage({
               href={`/dashboard/cases/${c.id}`}
               className="grid grid-cols-12 px-4 py-3 text-sm hover:bg-paper/60 transition-colors items-center"
             >
-              <div className="col-span-2 aktenzeichen text-[10px]">{c.case_number ?? "—"}</div>
+              <div className="col-span-2 aktenzeichen text-[10px]">
+                {c.case_number ?? "—"}
+                {c.needs_review && <span className="ml-1 text-brass">🤖</span>}
+              </div>
               <div className="col-span-3 text-ink">{c.clients?.full_name ?? "Unbekannt"}</div>
               <div className="col-span-2 text-ash">{c.case_type}</div>
               <div className="col-span-2 text-ash">{STATUS_LABELS[c.status] ?? c.status}</div>
