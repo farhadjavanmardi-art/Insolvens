@@ -35,17 +35,17 @@ export default async function DashboardPage() {
     ]);
 
   return (
-    <div className="p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <h1 className="font-serif text-2xl font-semibold text-ink mb-1">Übersicht</h1>
       <p className="text-sm text-ash mb-8">Aktueller Stand der Kanzlei</p>
 
-      <div className="grid grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
         <StatCard label="Laufende Akten" value={openCases ?? 0} />
         <StatCard label="Offene Fristen" value={upcomingDeadlines?.length ?? 0} accent />
         <StatCard label="Offene Aufgaben" value={openTasks ?? 0} />
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h2 className="text-sm font-semibold text-ink mb-3 uppercase tracking-wide">Nächste Fristen</h2>
           <div className="bg-white border border-ink/10 rounded-sm divide-y divide-ink/10">

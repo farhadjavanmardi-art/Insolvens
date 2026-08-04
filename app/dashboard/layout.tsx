@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/SignOutButton";
+import MobileNav from "@/components/MobileNav";
 
 export default async function DashboardLayout({
   children,
@@ -16,8 +17,10 @@ export default async function DashboardLayout({
   if (!user) redirect("/login");
 
   return (
-    <div className="min-h-screen flex">
-      <aside className="w-60 shrink-0 bg-ink text-paper flex flex-col">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      <MobileNav userEmail={user.email ?? ""} />
+
+      <aside className="hidden md:flex w-60 shrink-0 bg-ink text-paper flex-col">
         <div className="px-6 py-6 border-b border-paper/10">
           <div className="font-serif text-xl font-semibold">InsolvenzFlow</div>
           <div className="text-xs text-paper/50 mt-1">{user.email}</div>
@@ -46,7 +49,7 @@ export default async function DashboardLayout({
           <SignOutButton />
         </div>
       </aside>
-      <main className="flex-1 bg-paper">{children}</main>
+      <main className="flex-1 bg-paper min-w-0">{children}</main>
     </div>
   );
 }

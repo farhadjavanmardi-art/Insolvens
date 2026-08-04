@@ -116,7 +116,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="p-10 max-w-xl">
+    <div className="p-4 sm:p-6 md:p-10 max-w-xl">
       <h1 className="font-serif text-2xl font-semibold text-ink mb-1">Einstellungen</h1>
       <p className="text-sm text-ash mb-8">KI-Anbindung für Voice-to-Email und Foto-to-Email</p>
 
@@ -187,7 +187,7 @@ export default async function SettingsPage() {
           </div>
         )}
         <form action={saveEmailSettings} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="label">Absender-Name</label>
               <input name="from_name" defaultValue={emailSettings?.from_name ?? ""} className="input w-full" placeholder="Kanzlei Mustermann" />

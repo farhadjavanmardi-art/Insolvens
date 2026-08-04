@@ -51,11 +51,11 @@ export default async function ReportsPage() {
     decided.length > 0 ? Math.round((closedCases.length / decided.length) * 100) : null;
 
   return (
-    <div className="p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <h1 className="font-serif text-2xl font-semibold text-ink mb-1">Berichte</h1>
       <p className="text-sm text-ash mb-8">Kanzleiweite Auswertung aller Akten</p>
 
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         <Kpi label="Akten gesamt" value={String(allCases.length)} />
         <Kpi label="Aktive Schuldsumme" value={`${totalActiveDebt.toLocaleString("de-DE")} €`} />
         <Kpi
@@ -71,7 +71,7 @@ export default async function ReportsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white border border-ink/10 rounded-sm p-6">
           <h2 className="text-sm font-semibold text-ink uppercase tracking-wide mb-4">Neue Akten pro Monat</h2>
           <MonthlyCasesChart data={monthlyCounts} />

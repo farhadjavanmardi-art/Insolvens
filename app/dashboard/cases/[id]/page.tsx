@@ -280,12 +280,12 @@ export default async function CaseDetailPage({
   // ---------- Render ----------
 
   return (
-    <div className="p-10 max-w-4xl">
+    <div className="p-4 sm:p-6 md:p-10 max-w-4xl">
       <Link href="/dashboard/cases" className="text-xs text-ash hover:text-ink">
         ← Zurück zu allen Akten
       </Link>
 
-      <div className="flex items-start justify-between mt-3 mb-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mt-3 mb-2">
         <div>
           <div className="aktenzeichen text-xs mb-2">{theCase.case_number}</div>
           <h1 className="font-serif text-2xl font-semibold text-ink">{theCase.clients?.full_name}</h1>
@@ -297,7 +297,7 @@ export default async function CaseDetailPage({
       </div>
 
       {theCase.needs_review && (
-        <div className="flex items-center justify-between bg-brass/10 border border-brass/40 rounded-sm px-4 py-2.5 mb-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between bg-brass/10 border border-brass/40 rounded-sm px-4 py-2.5 mb-6">
           <span className="text-xs text-ink">
             🤖 Diese Akte wurde automatisch von der KI angelegt und ist noch nicht von einem/einer
             Anwalt/Anwältin geprüft.
@@ -342,7 +342,7 @@ export default async function CaseDetailPage({
             <p className="py-3 text-sm text-ash">Noch keine Gläubiger erfasst.</p>
           )}
         </div>
-        <form action={addCreditor} className="grid grid-cols-2 gap-3">
+        <form action={addCreditor} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input name="name" required placeholder="Name des Gläubigers" className="input col-span-2" />
           <input name="claim_amount" type="number" step="0.01" placeholder="Forderungsbetrag (€)" className="input" />
           <select name="rank" className="input" defaultValue="einfach">
@@ -382,7 +382,7 @@ export default async function CaseDetailPage({
             <p className="py-3 text-sm text-ash">Keine Fristen erfasst.</p>
           )}
         </div>
-        <form action={addDeadline} className="grid grid-cols-2 gap-3">
+        <form action={addDeadline} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input name="title" required placeholder="Bezeichnung der Frist" className="input col-span-2" />
           <input name="due_date" type="date" required className="input" />
           <input name="description" placeholder="Notiz (optional)" className="input" />
@@ -415,7 +415,7 @@ export default async function CaseDetailPage({
             <p className="py-3 text-sm text-ash">Keine Aufgaben erfasst.</p>
           )}
         </div>
-        <form action={addTask} className="grid grid-cols-2 gap-3">
+        <form action={addTask} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input name="title" required placeholder="Aufgabe" className="input col-span-2" />
           <input name="due_date" type="date" className="input" />
           <select name="priority" className="input" defaultValue="normal">
@@ -476,7 +476,7 @@ export default async function CaseDetailPage({
 
       {/* E-Mail Vorlagen */}
       <Section title="E-Mail" count={0}>
-        <form method="get" id="email" className="grid grid-cols-2 gap-3 mb-5">
+        <form method="get" id="email" className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
           <select name="email_template" defaultValue={searchParams.email_template ?? ""} className="input">
             <option value="">Vorlage wählen…</option>
             {Object.entries(EMAIL_TEMPLATES).map(([key, t]) => (
@@ -516,7 +516,7 @@ export default async function CaseDetailPage({
 
 
       <Section title="Insolvenzplan" count={plan ? 1 : 0}>
-        <form action={savePlan} className="grid grid-cols-3 gap-3">
+        <form action={savePlan} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="label">Monatliche Rate (€)</label>
             <input
@@ -601,7 +601,7 @@ export default async function CaseDetailPage({
           </Link>
           . Es werden keine Audio-/Bilddaten dauerhaft gespeichert.
         </p>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <VoiceToEmailForm caseId={caseId} />
           <PhotoToEmailForm caseId={caseId} />
           <OcrDocumentForm caseId={caseId} />

@@ -29,7 +29,7 @@ export default async function CasesListPage({
   const { data: cases } = await query;
 
   return (
-    <div className="p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <div className="flex items-center justify-between mb-1">
         <h1 className="font-serif text-2xl font-semibold text-ink">Akten</h1>
         <Link
@@ -54,7 +54,7 @@ export default async function CasesListPage({
       </div>
 
       <div className="bg-white border border-ink/10 rounded-sm divide-y divide-ink/10">
-        <div className="grid grid-cols-12 px-4 py-2 text-xs font-semibold text-ash uppercase tracking-wide">
+        <div className="hidden md:grid grid-cols-12 px-4 py-2 text-xs font-semibold text-ash uppercase tracking-wide">
           <div className="col-span-2">Aktenzeichen</div>
           <div className="col-span-3">Mandant</div>
           <div className="col-span-2">Verfahrensart</div>
@@ -67,19 +67,22 @@ export default async function CasesListPage({
             <Link
               key={c.id}
               href={`/dashboard/cases/${c.id}`}
-              className="grid grid-cols-12 px-4 py-3 text-sm hover:bg-paper/60 transition-colors items-center"
+              className="flex flex-col gap-1 px-4 py-3 text-sm hover:bg-paper/60 transition-colors md:grid md:grid-cols-12 md:items-center md:gap-0"
             >
-              <div className="col-span-2 aktenzeichen text-[10px]">
-                {c.case_number ?? "—"}
-                {c.needs_review && <span className="ml-1 text-brass">🤖</span>}
+              <div className="flex items-center justify-between md:col-span-2 md:block">
+                <span className="aktenzeichen text-[10px]">
+                  {c.case_number ?? "—"}
+                  {c.needs_review && <span className="ml-1 text-brass">🤖</span>}
+                </span>
+                <span className="text-xs text-ash md:hidden">{new Date(c.created_at).toLocaleDateString("de-DE")}</span>
               </div>
-              <div className="col-span-3 text-ink">{c.clients?.full_name ?? "Unbekannt"}</div>
-              <div className="col-span-2 text-ash">{c.case_type}</div>
-              <div className="col-span-2 text-ash">{STATUS_LABELS[c.status] ?? c.status}</div>
-              <div className="col-span-2 text-ash">
+              <div className="md:col-span-3 text-ink font-medium md:font-normal">{c.clients?.full_name ?? "Unbekannt"}</div>
+              <div className="md:col-span-2 text-ash text-xs md:text-sm">{c.case_type}</div>
+              <div className="md:col-span-2 text-ash text-xs md:text-sm">{STATUS_LABELS[c.status] ?? c.status}</div>
+              <div className="md:col-span-2 text-ash text-xs md:text-sm">
                 {c.total_debt ? `${Number(c.total_debt).toLocaleString("de-DE")} €` : "—"}
               </div>
-              <div className="col-span-1 text-xs text-ash">
+              <div className="hidden md:block md:col-span-1 text-xs text-ash">
                 {new Date(c.created_at).toLocaleDateString("de-DE")}
               </div>
             </Link>

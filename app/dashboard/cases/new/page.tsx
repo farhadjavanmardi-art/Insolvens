@@ -64,7 +64,7 @@ async function createCase(formData: FormData) {
 
 export default function NewCasePage() {
   return (
-    <div className="p-10 max-w-2xl">
+    <div className="p-4 sm:p-6 md:p-10 max-w-2xl">
       <h1 className="font-serif text-2xl font-semibold text-ink mb-1">Neue Akte anlegen</h1>
       <p className="text-sm text-ash mb-8">
         Erfassen Sie die Mandanten- und Falldaten. Ein Aktenzeichen wird automatisch vergeben.
@@ -74,7 +74,7 @@ export default function NewCasePage() {
         <fieldset className="space-y-4">
           <legend className="text-xs font-semibold text-ink uppercase tracking-wide mb-2">Mandant</legend>
           <Field label="Vollständiger Name" name="full_name" required placeholder="Max Mustermann" />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="E-Mail" name="email" type="email" placeholder="max@beispiel.de" />
             <Field label="Telefon" name="phone" placeholder="+49 151 ..." />
           </div>

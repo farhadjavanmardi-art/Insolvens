@@ -195,7 +195,7 @@ export default function IntakePage({ params }: { params: { token: string } }) {
                     value={c.name}
                     onChange={(e) => updateCreditor(i, { name: e.target.value })}
                   />
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       className="input"
                       placeholder="Betrag (€), ca."

@@ -20,7 +20,7 @@ export default async function DocumentViewPage({ params }: { params: { id: strin
   }
 
   return (
-    <div className="p-10 max-w-3xl">
+    <div className="p-4 sm:p-6 md:p-10 max-w-3xl">
       <div className="flex items-center justify-between mb-6 print:hidden">
         <Link href={`/dashboard/cases/${doc.cases?.id}`} className="text-xs text-ash hover:text-ink">
           ← Zurück zur Akte

@@ -167,7 +167,7 @@ export default async function IntakeDetailPage({ params }: { params: { id: strin
     : null;
 
   return (
-    <div className="p-10 max-w-3xl">
+    <div className="p-4 sm:p-6 md:p-10 max-w-3xl">
       <Link href="/dashboard/intake" className="text-xs text-ash hover:text-ink">
         ← Zurück zu Anfragen
       </Link>

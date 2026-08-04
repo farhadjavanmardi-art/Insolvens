@@ -28,7 +28,7 @@ export default async function IntakeListPage() {
   const siteOrigin = host ? `${proto}://${host}` : "";
 
   return (
-    <div className="p-10">
+    <div className="p-4 sm:p-6 md:p-10">
       <h1 className="font-serif text-2xl font-semibold text-ink mb-1">Neue Anfragen</h1>
       <p className="text-sm text-ash mb-6">Selbstauskünfte potenzieller Mandanten</p>
 
