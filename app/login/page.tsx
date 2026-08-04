@@ -51,7 +51,6 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="mb-10 text-center">
-          <div className="aktenzeichen mb-4 text-xs">AZ. IF-2026-001</div>
           <h1 className="font-serif text-3xl font-semibold text-ink">InsolvenzFlow</h1>
           <p className="mt-2 text-sm text-ash">Kanzleiverwaltung für Insolvenzrecht</p>
         </div>
